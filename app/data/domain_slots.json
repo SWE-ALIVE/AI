@@ -1,0 +1,92 @@
+{
+  "WASHING_MACHINE": {
+    "power": [
+      "켜짐",
+      "꺼짐"
+    ],
+    "mode": [
+      "표준",
+      "섬세",
+      "찌든때",
+      "급속"
+    ]
+  },
+  "REFRIGERATOR": {
+    "power": [
+      "켜짐",
+      "꺼짐"
+    ],
+    "temperature": {
+      "type": "range",
+      "min": 1,
+      "max": 7
+    },
+    "mode": [
+      "보통",
+      "절전",
+      "급속냉장"
+    ]
+  },
+  "AIR_CONDITIONER": {
+    "power": [
+      "켜짐",
+      "꺼짐"
+    ],
+    "temperature": {
+      "type": "range",
+      "min": 16,
+      "max": 30
+    },
+    "mode": [
+      "냉방",
+      "난방",
+      "자동",
+      "제습"
+    ],
+    "fan_speed": [
+      "약함",
+      "보통",
+      "강함",
+      "자동"
+    ]
+  },
+  "AIR_PURIFIER": {
+    "power": [
+      "켜짐",
+      "꺼짐"
+    ],
+    "mode": [
+      "자동",
+      "수면",
+      "터보"
+    ],
+    "fan_speed": [
+      "약함",
+      "보통",
+      "강함",
+      "자동"
+    ]
+  },
+  "TV": {
+    "power": [
+      "켜짐",
+      "꺼짐"
+    ],
+    "volume": {
+      "type": "range",
+      "min": 0,
+      "max": 100
+    },
+    "channel": {
+      "type": "range",
+      "min": 1,
+      "max": 999
+    },
+    "mode": [
+      "일반",
+      "영화",
+      "스포츠",
+      "게임"
+    ]
+  }
+}

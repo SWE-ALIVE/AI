@@ -1,0 +1,77 @@
+CREATE TABLE washing_machine(
+name text,
+power text CHECK (power IN ('켜짐', '꺼짐')),
+mode text CHECK (mode IN ('표준', '섬세', '찌든때', '급속'))
+)
+/*
+3개의 예시 행:
+SELECT * FROM washing_machine LIMIT 3;
+name power mode
+LG 트롬 세탁기 켜짐 표준
+LG 통돌이 세탁기 꺼짐 찌든때
+LG 트롬 오브제컬렉션 세탁기 켜짐 급속
+*/
+
+CREATE TABLE refrigerator(
+name text,
+power text CHECK (power IN ('켜짐', '꺼짐')),
+temperature int CHECK (temperature BETWEEN 1 AND 7),
+mode text CHECK (mode IN ('보통', '절전', '급속냉장'))
+)
+/*
+3개의 예시 행:
+SELECT * FROM refrigerator LIMIT 3;
+name power temperature mode
+LG 모던엣지 냉장고 켜짐 3 보통
+LG SIGNATURE 냉장고 켜짐 5 절전
+LG 디오스 오브제컬렉션 빌트인 타입 냉장고 켜짐 2 급속냉장
+*/
+
+CREATE TABLE air_conditioner(
+name text,
+power text CHECK (power IN ('켜짐', '꺼짐')),
+temperature int CHECK (temperature BETWEEN 16 AND 30),
+mode text CHECK (mode IN ('냉방', '난방', '자동', '제습')),
+fan_speed text CHECK (fan_speed IN ('약함', '보통', '강함', '자동'))
+)
+/*
+3개의 예시 행:
+SELECT * FROM air_conditioner LIMIT 3;
+name power temperature mode fan_speed
+휘센 오브제컬렉션 위너 에어컨 켜짐 18 냉방 강함
+휘센 벽걸이에어컨 꺼짐 16 자동 보통
+휘센 오브제컬렉션 타워I 에어컨 켜짐 22 제습 약함
+*/
+
+CREATE TABLE air_purifier(
+name text,
+power text CHECK (power IN ('켜짐', '꺼짐')),
+mode text CHECK (mode IN ('자동', '수면', '터보')),
+fan_speed text CHECK (fan_speed IN ('약함', '보통', '강함', '자동'))
+)
+/*
+3개의 예시 행:
+SELECT * FROM air_purifier LIMIT 3;
+name power mode fan_speed
+LG 퓨리케어 360˚ 공기청정기 플러스 켜짐 자동 보통
+LG 퓨리케어 오브제컬렉션 에어로타워 켜짐 수면 약함
+LG 퓨리케어 오브제컬렉션 에어로퍼니처 꺼짐 터보 강함
+*/
+
+CREATE TABLE tv(
+name text,
+power text CHECK (power IN ('켜짐', '꺼짐')),
+volume int CHECK (volume BETWEEN 0 AND 100),
+channel int CHECK (channel BETWEEN 1 AND 999),
+mode text CHECK (mode IN ('일반', '영화', '스포츠', '게임'))
+)
+/*
+3개의 예시 행:
+SELECT * FROM tv LIMIT 3;
+name power volume channel mode
+LG 올레드 evo (스탠드형) 켜짐 30 15 일반
+LG 올레드 TV (스탠드형) 꺼짐 0 2 영화
+LG SIGNATURE OLED 8K 켜짐 45 78 스포츠
+*/
+
+-- 위의 테이블들을 사용하여 다음의 다중 턴 대화형 질문들에 대해 유효한 SQL 쿼리로 답하시오.
