@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -28,57 +29,94 @@ class PromptRequest(BaseModel):
     prompt: str
 
 
+class DeviceCategory(Enum):
+    WASHING_MACHINE = "세탁기"
+    DRYER = "건조기"
+    REFRIGERATOR = "냉장고"
+    AIR_CONDITIONER = "에어컨"
+    TV = "TV"
+    HUMIDIFIER = "가습기"
+    AIR_PURIFIER = "공기청정기"
+    OVEN = "오븐"
+    KIMCHI_REFRIGERATOR = "김치냉장고"
+    VACUUM_CLEANER = "청소기"
+
+
 @app.get("/")
 async def read_root():
     return {"message": "Hello, World!"}
 
 
+def parse_ai_response(ai_message):
+    # DeviceCategory의 모든 값들을 가져옵니다.
+    allowed_appliances = [device.value for device in DeviceCategory]
+
+    # 응답을 줄 단위로 분리합니다.
+    lines = ai_message.strip().split('\n')
+    dialogues = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue  # 빈 줄은 스킵합니다.
+        if ':' in line:
+            # 첫 번째 콜론을 기준으로 가전제품명과 메시지를 분리합니다.
+            appliance, message = line.split(':', 1)
+            appliance = appliance.strip()
+            message = message.strip()
+            # 가전제품명이 허용된 목록에 있는지 확인합니다.
+            if appliance in allowed_appliances:
+                dialogues.append({'appliance': appliance, 'message': message})
+            else:
+                # 허용되지 않은 가전제품명인 경우, 에러 로그를 남기고 해당 대화를 스킵하거나 처리합니다.
+                print(f"허용되지 않은 가전제품명 발견: {appliance}")
+                continue
+        else:
+            # 포맷에 맞지 않는 경우 전체를 메시지로 저장합니다.
+            dialogues.append({'appliance': None, 'message': line})
+    return dialogues
+
+
 @app.post("/generate")
 async def generate_text(request: PromptRequest):
-    print(api_key, azure_endpoint, api_version)
     try:
+        # 현재 파일의 디렉토리를 기준으로 system_prompt.txt 파일의 경로를 설정합니다.
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        system_prompt_path = os.path.join(current_dir, 'system_prompt.txt')
+
+        # system_prompt.txt 파일이 존재하는지 확인합니다.
+        if not os.path.exists(system_prompt_path):
+            raise FileNotFoundError(f"'{system_prompt_path}' 파일을 찾을 수 없습니다.")
+
+        # system_prompt.txt 파일을 읽어옵니다.
+        with open(system_prompt_path, 'r', encoding='utf-8') as f:
+            system_prompt = f.read()
+
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # 배포된 모델의 이름
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "당신은 스마트 홈의 여러 가전제품 역할을 하는 AI 비서입니다. "
-                        "사용자가 특정 가전제품을 호출하면, 그 가전제품으로서 먼저 응답하세요. "
-                        "만약 요청이 다른 가전제품이 더 적절한 경우라면, 호출된 가전제품이 먼저 그 사실을 알려주고, "
-                        "필요한 경우 해당 가전제품으로 전환하여 응답합니다. "
-                        "응답 시 다음 형식을 따르세요:\n\n"
-                        "가전제품명: 응답 내용\n\n"
-                        "예시:\n"
-                        "사용자: 냉장고야, 방이 좀 더운 거 같아\n"
-                        "냉장고: 제가 그 부분은 잘 못할 거 같네요. 에어컨에게 요청해 볼게요.\n"
-                        "에어컨: 마지막으로 설정한 온도(21도)로 냉방을 시작할까요?\n\n"
-                        "사용자: 세탁기야, 우유가 있니?\n"
-                        "세탁기: 그 부분은 냉장고가 더 잘 알 것 같습니다.\n"
-                        "냉장고: 현재 우유가 두 개 남아 있습니다.\n\n"
-                        "사용자: 세탁기야, 공기가 좀 안 좋은 것 같아\n"
-                        "세탁기: 제가 그 부분은 잘 못하지만, 공기청정기가 도와드릴 수 있어요.\n"
-                        "공기청정기: 현재 공기 질이 좋지 않습니다. 작동을 시작할까요?\n\n"
-                        "사용자: 에어컨아, 온도를 23도로 올려줘\n"
-                        "에어컨: 온도를 23도로 설정했습니다.\n\n"
-                        "사용자: 거실이 너무 습한 것 같아."
-                        "공기청정기: 거실의 공기 질도 나쁘네요. 공기청정 모드와 제습 모드를 동시에 작동할까요?"
-                        "항상 호출된 가전제품이 먼저 응답하고, 필요한 경우 다른 가전제품으로 자연스럽게 전환하세요."
-                    )
+                    "content": system_prompt  # 파일에서 읽어온 프롬프트 내용 사용
                 },
-
                 {
                     "role": "user",
                     "content": request.prompt
                 },
             ],
-            max_tokens=150,
+            max_tokens=50,
             temperature=0.5
         )
 
         # AI의 응답 메시지 내용만 추출
         ai_message = response.choices[0].message.content
 
-        return {"response": ai_message}
+        # 사용자 메시지를 대화 목록에 추가
+        dialogues = [{'appliance': '사용자', 'message': request.prompt}]
+
+        # AI의 응답을 파싱하여 대화 목록에 추가
+        ai_dialogues = parse_ai_response(ai_message)
+        dialogues.extend(ai_dialogues)
+
+        return {"dialogues": dialogues}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
