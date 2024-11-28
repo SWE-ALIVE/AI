@@ -42,12 +42,12 @@ table_prompt = load_prompt("app/prompts/table_prompt.txt")
 
 @router.post("/generate_sql", response_model=APIResponse)
 def generate_sql(turn_data: TurnData):
-    examples = retriever.retrieve(turn_data.dict(), top_k=3)
+    examples = retriever.retrieve(turn_data.model_dump(), top_k=3)
     prompt = (
         table_prompt
         + examples
         + "Example #6\n"
-        + turn_data_to_str(turn_data.dict())
+        + turn_data_to_str(turn_data.model_dump())
         + "\nSQL: "
     )
 
