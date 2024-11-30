@@ -2,7 +2,7 @@
 생성 규칙
 1. **domain**:
    - 사용자가 제어하려는 가전제품 이름을 지정합니다.
-   - 예: "AIR_CONDITIONER", "TV"
+   - 예: ["AIR_CONDITIONER", "TV"]
 
 2. **context**:
    - 사용자의 요청에 따라 업데이트된 대화 상태를 포함합니다.

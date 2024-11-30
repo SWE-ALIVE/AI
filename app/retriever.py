@@ -4,7 +4,8 @@ import numpy as np
 import torch
 import json
 from typing import List
-from app.data.create_dataset_openai import TurnData, Dialog
+from app.data.create_dataset_openai import TurnData
+from app.config.data_class import APIRequest
 
 
 class KoreanDialogRetriever:
@@ -18,14 +19,20 @@ class KoreanDialogRetriever:
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
+        total_dialogs = len(data)
         self.dialogs = []
+        filtered_count = 0
+
         for dialog in data:
             if not dialog["dialog"]["usr"] or not dialog["dialog"].get("sys"):
+                filtered_count += 1
                 continue
 
             self.dialogs.append(TurnData(**dialog))
 
-        print(f"✅ {len(self.dialogs)}개의 대화 턴을 로드했습니다.")
+        print(f"📊 전체 대화 수: {total_dialogs}")
+        print(f"❌ 필터링된 대화 수: {filtered_count}")
+        print(f"✅ 사용 가능한 대화 수: {len(self.dialogs)}")
 
     def _create_dialog_context(self, turn: TurnData) -> str:
         # 슬롯 값들을 정렬된 순서로 생성
@@ -45,7 +52,7 @@ class KoreanDialogRetriever:
 
     def _create_sql_query(self, turn: TurnData) -> str:
         # 해당 도메인 테이블에 대한 SQL 쿼리 생성
-        domain = turn.domains[0].lower()
+        domain = turn.domains[0].upper()
         sql = f"SELECT * FROM {domain}"
 
         # 슬롯 값이 있는 경우 WHERE 절 추가
@@ -80,15 +87,15 @@ class KoreanDialogRetriever:
         self.kdtree = KDTree(self.embeddings)
         print("✅ 검색 인덱스가 구축되었습니다.")
 
-    def retrieve(self, query_turn: dict, top_k: int = 5) -> str:
+    def retrieve(self, query_turn: APIRequest, top_k: int = 5) -> str:
         if self.kdtree is None:
             raise ValueError("먼저 build_index를 호출하여 검색 인덱스를 구축해주세요.")
 
         query = TurnData(
             ID="test",
-            turn_id=1,  # 임시 turn_id
+            turn_id=1,
             domains=list(set(sv["domain"] for sv in query_turn["slot_values"])),
-            dialog=Dialog(**query_turn["dialog"]),
+            dialog=query_turn["dialog"],
             slot_values=query_turn["slot_values"],
             turn_slot_values=[],
             last_slot_values=[],
@@ -109,10 +116,10 @@ class KoreanDialogRetriever:
 
             # 예시 형식에 맞게 출력 형식화
             example = f"""
-Example #{i}
-{context}
-SQL: {sql}
-"""
+            Example #{i}
+            {context}
+            SQL: {sql}
+            """
             results.append(example)
 
         return "\n".join(results)
@@ -122,10 +129,10 @@ SQL: {sql}
         formatted_examples = []
         for i, example in enumerate(examples, 1):
             formatted_example = f"""
-Example #{i}
-{self._create_dialog_context(example['turn'])}
-SQL: {self._create_sql_query(example['turn'])}
-"""
+            Example #{i}
+            {self._create_dialog_context(example['turn'])}
+            SQL: {self._create_sql_query(example['turn'])}
+            """
             formatted_examples.append(formatted_example)
 
         return "\n".join(formatted_examples)
