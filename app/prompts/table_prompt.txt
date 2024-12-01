@@ -1,30 +1,15 @@
-CREATE TABLE washing_machine(
-name text,
-power text CHECK (power IN ('켜짐', '꺼짐')),
-mode text CHECK (mode IN ('표준', '섬세', '찌든때', '급속'))
+CREATE TABLE robot_cleaner(
+	name text,
+	power text CHECK (power IN ('켜짐', '꺼짐')),
+	mode text CHECK (mode IN ('지그재그', '꼼꼼', '집중', '보통')),
 )
 /*
 3개의 예시 행:
-SELECT * FROM washing_machine LIMIT 3;
+SELECT * FROM robot_cleaner LIMIT 3;
 name power mode
-LG 트롬 세탁기 켜짐 표준
-LG 통돌이 세탁기 꺼짐 찌든때
-LG 트롬 오브제컬렉션 세탁기 켜짐 급속
-*/
-
-CREATE TABLE refrigerator(
-name text,
-power text CHECK (power IN ('켜짐', '꺼짐')),
-temperature int CHECK (temperature BETWEEN 1 AND 7),
-mode text CHECK (mode IN ('보통', '절전', '급속냉장'))
-)
-/*
-3개의 예시 행:
-SELECT * FROM refrigerator LIMIT 3;
-name power temperature mode
-LG 모던엣지 냉장고 켜짐 3 보통
-LG SIGNATURE 냉장고 켜짐 5 절전
-LG 디오스 오브제컬렉션 빌트인 타입 냉장고 켜짐 2 급속냉장
+LG 코드제로 로보킹 AI 올인원 (프리스탠딩) 켜짐 지그재그
+LG 코드제로 오브제컬렉션 M9 켜짐 꼼꼼
+LG 코드제로 R5 켜짐 집중
 */
 
 CREATE TABLE air_conditioner(

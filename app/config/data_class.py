@@ -13,6 +13,11 @@ class SlotValue(BaseModel):
     value: str
 
 
+class DomainMessage(BaseModel):
+    domain: str
+    message: str
+
+
 class TurnData(BaseModel):
     ID: str
     turn_id: int
@@ -30,5 +35,5 @@ class APIRequest(BaseModel):
 
 class APIResponse(BaseModel):
     sql: str
-    message: str
+    message: list[DomainMessage]
     context: list[SlotValue]

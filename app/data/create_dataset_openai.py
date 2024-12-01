@@ -1,15 +1,36 @@
 import os
 from openai import OpenAI
-from pydantic import BaseModel
 from typing import Literal
 import json
 import time
 import random
-from app.config.data_class import TurnData
+from pydantic import BaseModel
+
+
+class Dialog(BaseModel):
+    sys: list[str]
+    usr: list[str]
+
+
+class SlotValue(BaseModel):
+    domain: str
+    slot: str
+    value: str
+
+
+class TurnData(BaseModel):
+    ID: str
+    turn_id: int
+    domains: list[str]
+    dialog: Dialog
+    slot_values: list[SlotValue]
+    turn_slot_values: list[SlotValue]
+    last_slot_values: list[SlotValue]
+
 
 domain_slot_file = "app/config/domain_slots.json"
-output_file = "app/data/gpt4_temp0.7.json"
-num_examples = 40
+output_file = "app/data/gpt4o_dataset.json"
+num_examples = 240
 
 with open(domain_slot_file, "r") as f:
     DOMAIN_SLOTS = json.load(f)

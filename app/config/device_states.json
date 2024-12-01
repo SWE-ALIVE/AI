@@ -1,0 +1,23 @@
+{
+  "AIR_CONDITIONER": {
+    "power": "꺼짐",
+    "temperature": 24,
+    "mode": "자동",
+    "fan_speed": "자동"
+  },
+  "AIR_PURIFIER": {
+    "power": "꺼짐",
+    "mode": "수면",
+    "fan_speed": "자동"
+  },
+  "TV": {
+    "power": "꺼짐",
+    "volume": 30,
+    "channel": 1,
+    "mode": "일반"
+  },
+  "ROBOT_CLEANER": {
+    "power": "꺼짐",
+    "mode": "보통"
+  }
+}

@@ -7,16 +7,19 @@ from app.retriever import KoreanDialogRetriever
 from app.helper.turn_data_to_str import turn_data_to_str
 from app.config.data_class import APIRequest, APIResponse
 import json
+from display.state_manager import DeviceStateManager
 
 router = APIRouter()
 
 domain_slot_file = "app/config/domain_slots.json"
+dataset_file = "app/data/gpt4o_dataset.json"
+
 with open(domain_slot_file, "r") as f:
     DOMAIN_SLOTS = json.load(f)
 
 
 retriever = KoreanDialogRetriever()
-retriever.load_dialogs("app/data/gpt4_dataset.json")
+retriever.load_dialogs(dataset_file)
 retriever.build_index()
 
 
@@ -47,10 +50,15 @@ def generate_sql(request: APIRequest):
     - 사용자: {request.dialog['usr'][-1]}
     - 시스템: {request.dialog['sys'][-1]}
     생성 규칙
+    가전제품 기능이 실행되기 전 반드시 전원을 먼저 켜야 합니다.
     1. **context**:
     - 사용자의 발화 내용으로 인해 변경된 슬롯 값 목록입니다. 이때 도메인은 다음 중 하나이어야 합니다: {", ".join(DOMAIN_SLOTS.keys())}
-    3. **message**:
-    - 해당 의인화된 가전제품이 직접 사용자와 대화하는 것처럼 자연스럽게 응답합니다.
+    3. **messages**:
+    - 해당 의인화된 가전제품들이 각각 직접 사용자와 대화하는 것처럼 자연스럽게 응답합니다. 이때 다음과 같은 형태로 응답을 생성합니다:
+    [
+        {{"domain": "가전제품 도메인", "message": "가전제품의 응답 메시지"}}
+    ]
+    두 가전제품이 서로 이야기해도 좋아.
     4. **sql**:
     - 대화 상태를 반영한 SQL 쿼리를 생성합니다.
     - 예: "UPDATE AIR_PURIFIER SET fan_speed = "보통" WHERE name = '휘센 오브제컬렉션 위너 에어컨';"
@@ -59,7 +67,7 @@ def generate_sql(request: APIRequest):
     try:
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         completion = client.beta.chat.completions.parse(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt},
@@ -71,6 +79,9 @@ def generate_sql(request: APIRequest):
 
         if completion:
             response = completion.choices[0].message.parsed
+            state_manager = DeviceStateManager()
+            response_data = response.model_dump()
+            state_manager.update_states(response_data["context"])
             return response
         else:
             raise HTTPException(status_code=500, detail="No completion received.")

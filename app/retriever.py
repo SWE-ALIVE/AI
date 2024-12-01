@@ -30,9 +30,7 @@ class KoreanDialogRetriever:
 
             self.dialogs.append(TurnData(**dialog))
 
-        print(f"📊 전체 대화 수: {total_dialogs}")
-        print(f"❌ 필터링된 대화 수: {filtered_count}")
-        print(f"✅ 사용 가능한 대화 수: {len(self.dialogs)}")
+        print(f"✅ 전체 대화 수: {total_dialogs}")
 
     def _create_dialog_context(self, turn: TurnData) -> str:
         # 슬롯 값들을 정렬된 순서로 생성
@@ -74,7 +72,7 @@ class KoreanDialogRetriever:
         if not self.dialogs:
             raise ValueError("먼저 load_dialogs를 호출하여 대화 데이터를 로드해주세요.")
 
-        print("임베딩 생성 중...")
+        print("🔥 임베딩 생성 중...")
         dialog_contexts = [self._create_dialog_context(turn) for turn in self.dialogs]
 
         with torch.no_grad():
